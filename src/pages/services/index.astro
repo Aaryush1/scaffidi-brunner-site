@@ -1,0 +1,48 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import SectionHead from '../../components/SectionHead.astro';
+import ServiceCard from '../../components/ServiceCard.astro';
+import ClosingCta from '../../components/ClosingCta.astro';
+import AudiencePicker from '../../components/AudiencePicker.astro';
+import { differentiators } from '../../content/firm';
+import { services, isListed } from '../../content/services';
+---
+<Base title="Services" description={differentiators.complete.body[1]}>
+  <PageHero eyebrow={differentiators.eyebrow} title={differentiators.heading} image="/media/tax-guidance.jpg" />
+
+  <section class="section">
+    <div class="wrap">
+      <ul class="pillars" role="list">
+        {differentiators.items.map((d) => <li data-reveal><h2 class="h-card">{d.title}</h2><p>{d.body}</p></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap split">
+      <SectionHead eyebrow="From proactive tax planning to complex transactions" title={differentiators.complete.heading} />
+      <div class="prose">{differentiators.complete.body.map((p) => <p>{p}</p>)}</div>
+    </div>
+  </section>
+
+  <section class="section" id="capabilities">
+    <div class="wrap">
+      <SectionHead eyebrow={differentiators.eyebrow} title="Our Capabilities" />
+      <AudiencePicker id="services" />
+      <ul class="grid" role="list">{services.filter(isListed).map((s, i) => <ServiceCard service={s} index={i} />)}</ul>
+    </div>
+  </section>
+  <ClosingCta />
+</Base>
+
+<style>
+  .pillars { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+  .pillars li { border-top: 1px solid var(--accent); padding-top: 22px; }
+  .pillars p { margin-top: 10px; color: var(--muted); font-size: .95rem; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 88px); }
+  .prose { display: grid; gap: 18px; font-size: 1.05rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 22px; margin: 0; padding: 0; }
+  @media (max-width: 900px) { .pillars { grid-template-columns: 1fr 1fr; } .split { grid-template-columns: 1fr; } }
+  @media (max-width: 520px) { .pillars { grid-template-columns: 1fr; } }
+</style>

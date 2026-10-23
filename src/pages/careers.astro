@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { site } from '../config/site';
+// TODO(firm): list open roles here when you have them.
+---
+<Base title="Careers">
+  <PageHero eyebrow="Careers · Opportunities await" title="Join Our Team" lede="We’re a partner-led firm that works closely with business owners and families on the decisions that matter most." compact />
+  <section class="section">
+    <div class="wrap grid">
+      <div class="prose">
+        <h2 class="h-card">Interested in working with us?</h2>
+        <p>Send a short note and your résumé to <a href={`mailto:${site.contact.email}?subject=Careers`}>{site.contact.email}</a>. Tell us a little about yourself and the kind of work you want to do.</p>
+      </div>
+      <aside class="info" aria-label="Office details">
+        <div><h2 class="eyebrow">Our Office</h2><address>{site.contact.addressLines.map((l) => <span>{l}</span>)}</address></div>
+        <div><h2 class="eyebrow">Direct Contact</h2><p><a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></p><p><a href={site.contact.phoneHref}>{site.contact.phone}</a></p></div>
+        <div><h2 class="eyebrow">Business Hours</h2><p>{site.contact.hours}</p></div>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: clamp(32px, 6vw, 88px); align-items: start; }
+  .prose { display: grid; gap: 14px; }
+  .prose a, .info a { color: var(--heading); }
+  .info { display: grid; gap: 28px; padding: 32px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  .info .eyebrow { margin-bottom: 10px; }
+  address { font-style: normal; } address span { display: block; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+</style>

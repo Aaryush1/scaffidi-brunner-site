@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from './PageHero.astro';
+interface Props { title: string; href: string }
+const { title, href } = Astro.props;
+---
+<Base title={title}>
+  <PageHero eyebrow="Legal" title={title} compact />
+  <section class="section">
+    <div class="wrap policy">
+      <p>Our {title.toLowerCase()} is maintained with our compliance provider, iubenda, so it always reflects current law and our current practices.</p>
+      <!-- iubenda replaces this link with the full policy text when its script loads. -->
+      <div class="policy-embed" data-policy-embed>
+        <a href={href} class="iubenda-white iubenda-noiframe iubenda-embed iub-body-embed btn btn-ghost" title={title}>Read the full {title}</a>
+      </div>
+    </div>
+  </section>
+  <script is:inline slot="end" src="https://cdn.iubenda.com/iubenda.js" async></script>
+</Base>
+
+<style>
+  .policy { max-width: 880px; min-width: 0; display: grid; gap: 24px; justify-items: start; }
+  /* iubenda renders the policy inline; give it a fixed paper surface so our theme colors never clash with its own. */
+  .policy-embed { width: 100%; min-width: 0; max-width: 100%; overflow-wrap: anywhere; overflow-x: auto; background: #fff; color: #262626; border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(20px, 4vw, 40px); }
+  .policy-embed :global(h1), .policy-embed :global(h2), .policy-embed :global(h3), .policy-embed :global(h4) { color: #14203b; }
+  .policy-embed :global(a:not(.btn)) { color: #7a5e38; }
+  .policy-embed > :global(.btn) { color: #14203b; }
+  .policy-embed :global(table), .policy-embed :global(pre) { display: block; max-width: 100%; overflow-x: auto; }
+  .policy-embed :global(img) { max-width: 100%; height: auto; }
+</style>

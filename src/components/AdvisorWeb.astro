@@ -1,0 +1,78 @@
+---
+// The firm's own words about how it works with other advisors, drawn from its service pages.
+const nodes = [
+  { id: 'estate', name: 'Estate attorneys', angle: -90, body: 'Estate planning often brings several advisors to the table. We work alongside estate attorneys, wealth advisors, trustees, and other professionals to bring tax perspective into the broader plan.' },
+  { id: 'wealth', name: 'Wealth advisors', angle: -18, body: 'We collaborate with attorneys, wealth advisors, and other professionals so tax strategy remains coordinated with the broader financial picture.' },
+  { id: 'invest', name: 'Investment professionals', angle: 54, body: 'Bring tax perspective to significant investments, capital allocation, and other consequential financial decisions.' },
+  { id: 'trustees', name: 'Trustees', angle: 126, body: 'Coordinated tax reporting for trusts, private foundations, and related family structures.' },
+  { id: 'attorneys', name: 'Business attorneys', angle: 198, body: 'Work alongside attorneys, wealth advisors, and other professionals to keep tax, business, estate, and ownership decisions connected.' },
+];
+const R = 38; // percent of the square stage
+const pos = nodes.map((n) => ({ ...n, x: 50 + R * Math.cos((n.angle * Math.PI) / 180), y: 50 + R * Math.sin((n.angle * Math.PI) / 180) }));
+---
+<div class="web" data-advisor-web data-copy={JSON.stringify(Object.fromEntries(nodes.map((n) => [n.id, { name: n.name, body: n.body }])))}>
+  <div class="stage">
+    <svg class="lines" viewBox="0 0 100 100" aria-hidden="true" preserveAspectRatio="none">
+      <circle cx="50" cy="50" r={R} class="orbit" />
+      {pos.map((n) => <line x1="50" y1="50" x2={n.x} y2={n.y} data-line={n.id} />)}
+    </svg>
+    <div class="hub" aria-hidden="true"><img src="/brand/ScaffidiBrunner_LetterLogo_WhiteGold.png" alt="" width="200" height="200" /></div>
+    <ul class="nodes" role="list" aria-label="Advisors we work alongside">
+      {pos.map((n) => (
+        <li style={`--x:${n.x}%;--y:${n.y}%`}>
+          <button type="button" data-node={n.id} aria-pressed="false" aria-controls="advisor-panel">{n.name}</button>
+        </li>
+      ))}
+    </ul>
+  </div>
+  <div class="panel" id="advisor-panel" aria-live="polite">
+    <p class="eyebrow">Fewer decisions made in isolation</p>
+    <h3 class="h-card" data-panel-title>Your advisors, working together</h3>
+    <p data-panel-body>Choose an advisor to see how we work alongside them.</p>
+  </div>
+</div>
+
+<script>
+  for (const web of document.querySelectorAll<HTMLElement>('[data-advisor-web]')) {
+    const copy = JSON.parse(web.dataset.copy!);
+    const title = web.querySelector('[data-panel-title]')!;
+    const body = web.querySelector('[data-panel-body]')!;
+    const select = (id: string) => {
+      web.querySelectorAll<HTMLButtonElement>('[data-node]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.node === id)));
+      web.querySelectorAll<SVGLineElement>('[data-line]').forEach((l) => l.classList.toggle('on', l.dataset.line === id));
+      title.textContent = copy[id].name;
+      body.textContent = copy[id].body;
+    };
+    web.querySelectorAll<HTMLButtonElement>('[data-node]').forEach((b) => {
+      b.addEventListener('click', () => select(b.dataset.node!));
+      b.addEventListener('mouseenter', () => select(b.dataset.node!));
+    });
+  }
+</script>
+
+<style>
+  .web { display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
+  .stage { position: relative; aspect-ratio: 1; max-width: 560px; width: 100%; margin-inline: auto; }
+  .lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .orbit { fill: none; stroke: var(--line); stroke-width: .3; stroke-dasharray: 1 1.4; }
+  line { stroke: color-mix(in srgb, var(--gold) 45%, transparent); stroke-width: .35; transition: stroke .3s, stroke-width .3s; }
+  line.on { stroke: var(--gold); stroke-width: .8; }
+  .hub { position: absolute; left: 50%; top: 50%; width: 26%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 35% 30%, var(--navy-lift), var(--navy) 60%, var(--navy-deep)); box-shadow: 0 0 0 10px color-mix(in srgb, var(--gold) 12%, transparent), 0 20px 50px -20px rgba(13, 22, 41, .7); }
+  .hub img { width: 52%; height: auto; }
+  .nodes { list-style: none; margin: 0; padding: 0; }
+  .nodes li { position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -50%); }
+  .nodes button { white-space: nowrap; padding: 10px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--heading); font-size: .85rem; font-weight: 500; cursor: pointer; box-shadow: var(--shadow); transition: border-color .25s, background-color .25s, color .25s; }
+  .nodes button:hover, .nodes button[aria-pressed='true'] { border-color: var(--gold); }
+  .nodes button[aria-pressed='true'] { background: var(--navy); color: #f6f2ea; }
+  :global([data-theme='dark']) .nodes button[aria-pressed='true'] { background: var(--gold); color: var(--navy); }
+  .panel { padding: clamp(24px, 3vw, 36px); border-left: 1px solid var(--accent); min-height: 220px; display: grid; align-content: start; gap: 12px; }
+  @media (max-width: 860px) {
+    .web { grid-template-columns: 1fr; }
+    .stage { aspect-ratio: auto; max-width: none; }
+    .lines, .hub { display: none; }
+    .nodes { display: flex; flex-wrap: wrap; gap: 10px; }
+    .nodes li { position: static; transform: none; }
+    .nodes button { white-space: normal; box-shadow: none; }
+    .panel { border-left: 0; border-top: 1px solid var(--accent); padding-inline: 0; min-height: 0; }
+  }
+</style>

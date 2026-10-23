@@ -1,0 +1,38 @@
+---
+import Letter from './Letter.astro';
+---
+<dialog class="note-dialog" data-note aria-labelledby="note-h">
+  <Letter headingId="note-h">
+    <div class="actions">
+      <button type="button" class="btn btn-solid" data-note-close>Open the site →</button>
+      <a class="later" href="/note/">Keep this note</a>
+    </div>
+  </Letter>
+</dialog>
+
+<script>
+  const KEY = 'sb-note-seen';
+  const dlg = document.querySelector<HTMLDialogElement>('[data-note]');
+  const seen = () => { try { return sessionStorage.getItem(KEY) === '1'; } catch { return false; } };
+  if (dlg && !seen()) {
+    dlg.showModal();
+    const done = () => {
+      try { sessionStorage.setItem(KEY, '1'); } catch { /* blocked: shows again next visit */ }
+      if (dlg.open) dlg.close();
+      document.getElementById('main')?.focus();
+    };
+    dlg.querySelector('[data-note-close]')!.addEventListener('click', done);
+    dlg.addEventListener('cancel', (e) => { e.preventDefault(); done(); });
+  }
+</script>
+
+<style>
+  .note-dialog { border: 0; padding: 16px; background: transparent; max-width: 100vw; max-height: 100dvh; overflow: auto; }
+  .note-dialog[open] { display: grid; place-items: center; width: 100vw; height: 100dvh; margin: 0; }
+  .note-dialog::backdrop { background: radial-gradient(900px 600px at 50% 30%, rgba(36, 54, 95, .92), rgba(13, 22, 41, .97)); backdrop-filter: blur(6px); }
+  .note-dialog[open] :global(.letter) { animation: rise .8s var(--ease) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(24px) scale(.98); } }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-top: 10px; }
+  .actions .btn-solid { color: var(--navy); }
+  .later { font-size: .85rem; color: #7a5e38; }
+</style>

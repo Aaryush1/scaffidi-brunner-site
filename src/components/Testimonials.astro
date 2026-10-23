@@ -1,0 +1,34 @@
+---
+import { testimonials } from '../content/firm';
+const [lead, ...rest] = testimonials;
+---
+<div class="quotes">
+  <figure class="lead" data-reveal>
+    <svg class="mark" viewBox="0 0 48 36" aria-hidden="true"><path d="M0 36V22C0 9 6 2 18 0l2 5c-6 2-9 6-9 12h8v19H0Zm28 0V22c0-13 6-20 18-22l2 5c-6 2-9 6-9 12h8v19H28Z" fill="currentColor"/></svg>
+    <blockquote><p>{lead.quote}</p></blockquote>
+    <figcaption>{lead.name} <span>· Client</span></figcaption>
+  </figure>
+  <div class="rest">
+    {rest.map((t, i) => (
+      <figure data-reveal style={`transition-delay:${(i + 1) * 120}ms`}>
+        <blockquote><p>{t.quote}</p></blockquote>
+        <figcaption>{t.name} <span>· Client</span></figcaption>
+      </figure>
+    ))}
+  </div>
+</div>
+
+<style>
+  .quotes { display: grid; grid-template-columns: 1.25fr 1fr; gap: clamp(32px, 5vw, 72px); align-items: start; }
+  figure { margin: 0; }
+  .mark { width: 44px; color: var(--accent); }
+  .lead blockquote { margin: 22px 0 0; }
+  .lead p { font-family: var(--font-display); color: var(--heading); font-size: clamp(1.5rem, 2.6vw, 2.2rem); line-height: 1.3; }
+  .rest { display: grid; gap: 28px; }
+  .rest figure { padding: 28px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  .rest blockquote { margin: 0; }
+  .rest p { font-size: 1rem; line-height: 1.7; color: var(--text); }
+  figcaption { margin-top: 18px; font-size: .8rem; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-text); font-weight: 500; }
+  figcaption span { color: var(--muted); }
+  @media (max-width: 860px) { .quotes { grid-template-columns: 1fr; } }
+</style>

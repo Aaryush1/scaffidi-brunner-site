@@ -1,0 +1,38 @@
+<button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark theme">
+  <svg class="i-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+  <svg class="i-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+</button>
+
+<script>
+  const root = document.documentElement;
+  const sync = () => {
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((b) => b.setAttribute('aria-label', `Switch to ${next} theme`));
+  };
+  sync();
+  const system = matchMedia('(prefers-color-scheme: dark)');
+  const stored = () => { try { return localStorage.getItem('sb-theme'); } catch { return null; } };
+  document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const t = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = t;
+      // Choosing the system's own theme means "follow the system" again; anything else is remembered.
+      const matchesSystem = (t === 'dark') === system.matches;
+      try { if (matchesSystem) localStorage.removeItem('sb-theme'); else localStorage.setItem('sb-theme', t); } catch { /* storage blocked */ }
+      sync();
+    }),
+  );
+  system.addEventListener('change', (e) => {
+    if (stored()) return;
+    root.dataset.theme = e.matches ? 'dark' : 'light';
+    sync();
+  });
+</script>
+
+<style>
+  .theme-toggle { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(212, 181, 138, .45); background: transparent; color: var(--gold-soft); cursor: pointer; transition: background-color .25s var(--ease); }
+  .theme-toggle:hover { background: rgba(212, 181, 138, .12); }
+  .i-sun { display: none; }
+  :global([data-theme='dark']) .i-sun { display: block; }
+  :global([data-theme='dark']) .i-moon { display: none; }
+</style>

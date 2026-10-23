@@ -1,0 +1,180 @@
+---
+import SectionHead from './SectionHead.astro';
+import { scenarios, WINDOW } from '../content/scenarios';
+import { audiences } from '../content/firm';
+import { formatKept, yearToPercent } from '../lib/scenarios';
+import type { ScenarioId } from '../content/types';
+
+const initial: ScenarioId = 'sale';
+const s0 = scenarios[initial];
+const years = Array.from({ length: WINDOW.end - WINDOW.start + 1 }, (_, i) => WINDOW.start + i);
+const audienceMap = Object.fromEntries(audiences.map((a) => [a.id, a.scenario]));
+const fmtYear = (y: number) => String(Math.floor(y));
+---
+<section class="section timeline" id="years-ahead" aria-labelledby="ya-h" data-timeline data-audience-map={JSON.stringify(audienceMap)}>
+  <div class="wrap">
+    <div class="top">
+      <SectionHead eyebrow="See it years ahead" title="The same decision, planned early or planned at filing." id="ya-h">
+        <p>Plan before the decision becomes a transaction. Pick a decision, then compare what happens when planning starts years ahead versus when the return is due.</p>
+      </SectionHead>
+    </div>
+
+    <div class="panel">
+      <div class="controls">
+        <div class="group" role="group" aria-label="Decision">
+          {Object.entries(scenarios).map(([id, s]) => (
+            <button type="button" class="chip" data-scenario={id} aria-pressed={String(id === initial)}>{s.label}</button>
+          ))}
+        </div>
+        <div class="seg" role="group" aria-label="When planning starts">
+          <button type="button" data-mode="early" aria-pressed="true">Plan early</button>
+          <button type="button" data-mode="late" aria-pressed="false">Plan at filing</button>
+        </div>
+      </div>
+
+      <div class="track" aria-hidden="true">
+        <div class="band"></div>
+        <div class="axis"></div>
+        {years.map((y) => <span class="yr" style={`left:${yearToPercent(y)}%`}>{y}</span>)}
+        <div class="evs">
+          {s0.early.map((e, i) => (
+            <div class:list={['ev', i % 2 ? 'below' : 'above', { tx: e.transaction }]} style={`left:${yearToPercent(e.year)}%`}>
+              <span class="lbl">{e.label}</span><i></i>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <ol class="events" aria-label="Timeline of events">
+        {s0.early.map((e) => <li class:list={{ tx: e.transaction }}><span class="when">{fmtYear(e.year)}</span> <span>{e.label}</span></li>)}
+      </ol>
+
+      <p class="note" aria-live="polite">{s0.earlyNote}</p>
+
+      <div class="out">
+        <div class="kept is-active" data-card="early">
+          <p class="k-lbl">Kept, planned early</p>
+          <p class="k-num" data-kept="early">{formatKept(s0.keptEarly)}</p>
+          <div class="bar"><span style="width:100%"></span></div>
+        </div>
+        <div class="kept" data-card="late">
+          <p class="k-lbl">Kept, planned at filing</p>
+          <p class="k-num" data-kept="late">{formatKept(s0.keptLate)}</p>
+          <div class="bar"><span style={`width:${(s0.keptLate / s0.keptEarly) * 100}%`}></span></div>
+        </div>
+      </div>
+      <p class="fine">Illustrative only. Not tax advice.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { scenarios } from '../content/scenarios';
+  import { formatKept, yearToPercent } from '../lib/scenarios';
+  import type { ScenarioId } from '../content/types';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-timeline]')) {
+    let current: ScenarioId = 'sale';
+    let mode: 'early' | 'late' = 'early';
+    const audienceMap = JSON.parse(root.dataset.audienceMap || '{}') as Record<string, ScenarioId>;
+    const evs = root.querySelector<HTMLElement>('.evs')!;
+    const list = root.querySelector<HTMLOListElement>('ol.events')!;
+    const band = root.querySelector<HTMLElement>('.band')!;
+    const note = root.querySelector<HTMLElement>('.note')!;
+    const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+
+    const render = () => {
+      const s = scenarios[current];
+      const events = s[mode];
+      evs.innerHTML = events.map((e, i) =>
+        `<div class="ev ${i % 2 ? 'below' : 'above'} ${e.transaction ? 'tx' : ''}" style="left:${yearToPercent(e.year)}%;--d:${i * 70}ms"><span class="lbl">${esc(e.label)}</span><i></i></div>`).join('');
+      list.innerHTML = events.map((e) =>
+        `<li class="${e.transaction ? 'tx' : ''}"><span class="when">${Math.floor(e.year)}</span> <span>${esc(e.label)}</span></li>`).join('');
+
+      // Gold band = the planning runway before the transaction; muted band = options already closed.
+      const tx = events.find((e) => e.transaction)!;
+      const xs = events.map((e) => yearToPercent(e.year));
+      const txX = yearToPercent(tx.year);
+      const from = mode === 'early' ? Math.min(...xs) : txX;
+      const to = mode === 'early' ? txX : Math.max(...xs);
+      band.style.left = `${from}%`;
+      band.style.width = `${to - from}%`;
+      band.dataset.mode = mode;
+
+      note.textContent = mode === 'early' ? s.earlyNote : s.lateNote;
+      root.querySelector('[data-kept="early"]')!.textContent = formatKept(s.keptEarly);
+      root.querySelector('[data-kept="late"]')!.textContent = formatKept(s.keptLate);
+      root.querySelector<HTMLElement>('[data-card="late"] .bar span')!.style.width = `${(s.keptLate / s.keptEarly) * 100}%`;
+      root.querySelectorAll<HTMLElement>('[data-card]').forEach((c) => c.classList.toggle('is-active', c.dataset.card === mode));
+      root.querySelectorAll<HTMLButtonElement>('[data-scenario]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.scenario === current)));
+      root.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+    };
+
+    root.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest('button');
+      if (!b) return;
+      if (b.dataset.scenario) current = b.dataset.scenario as ScenarioId;
+      if (b.dataset.mode) mode = b.dataset.mode as 'early' | 'late';
+      render();
+    });
+    window.addEventListener('sb:audience', (e) => {
+      const id = (e as CustomEvent<string | null>).detail;
+      if (id && audienceMap[id]) { current = audienceMap[id]; render(); }
+    });
+    render();
+  }
+</script>
+
+<style>
+  .timeline { background: linear-gradient(180deg, var(--bg), var(--surface-2)); }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: calc(var(--radius) + 6px); padding: clamp(22px, 4vw, 44px); box-shadow: var(--shadow); }
+  .controls { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; }
+  .group { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip { padding: 10px 18px; border-radius: 999px; border: 1px solid var(--line); background: transparent; cursor: pointer; font-size: .85rem; font-weight: 500; color: var(--heading); transition: background-color .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease); }
+  .chip:hover { border-color: var(--accent); }
+  .chip[aria-pressed='true'] { background: var(--navy); border-color: var(--navy); color: #f6f2ea; }
+  :global([data-theme='dark']) .chip[aria-pressed='true'] { background: var(--gold); border-color: var(--gold); color: var(--navy); }
+  .seg { display: inline-flex; padding: 4px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); }
+  .seg button { border: 0; background: transparent; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-size: .82rem; font-weight: 500; color: var(--muted); transition: background-color .25s var(--ease), color .25s var(--ease); }
+  .seg button[aria-pressed='true'] { background: var(--gold); color: var(--navy); }
+
+  .track { position: relative; height: 210px; margin: 34px 0 6px; }
+  .axis { position: absolute; left: 0; right: 0; top: 105px; height: 1px; background: var(--line); }
+  .band { position: absolute; top: 99px; height: 13px; border-radius: 999px; background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 20%, transparent), color-mix(in srgb, var(--gold) 55%, transparent)); transition: left .6s var(--ease), width .6s var(--ease), background .4s; }
+  .band[data-mode='late'] { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--muted) 30%, transparent) 0 6px, transparent 6px 12px); }
+  .yr { position: absolute; bottom: 0; transform: translateX(-50%); font-size: .75rem; color: var(--muted); letter-spacing: .08em; }
+  .evs :global(.ev) { position: absolute; width: 132px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; text-align: center; animation: pop .55s var(--ease) both; animation-delay: var(--d, 0ms); transition: left .6s var(--ease); }
+  .evs :global(.ev.above) { bottom: 99px; }
+  .evs :global(.ev.below) { top: 99px; flex-direction: column-reverse; }
+  .evs :global(.lbl) { font-size: .8rem; line-height: 1.3; color: var(--heading); font-weight: 500; padding: 0 4px; }
+  .evs :global(.ev i) { width: 13px; height: 13px; margin: 10px 0 0; border-radius: 50%; background: var(--surface); border: 2px solid var(--gold); flex: none; }
+  .evs :global(.ev.below i) { margin: 0 0 10px; }
+  .evs :global(.ev.tx i) { width: 17px; height: 17px; border-radius: 3px; transform: rotate(45deg); background: var(--navy); border-color: var(--gold); box-shadow: 0 0 0 5px color-mix(in srgb, var(--gold) 25%, transparent); }
+  :global([data-theme='dark']) .evs :global(.ev.tx i) { background: var(--gold); }
+  .evs :global(.ev.tx .lbl) { color: var(--accent-text); font-weight: 600; }
+  @keyframes pop { from { opacity: 0; transform: translate(-50%, 8px); } }
+
+  .events { list-style: none; margin: 0; padding: 0; }
+  @media (min-width: 721px) { .events { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } }
+  @media (max-width: 720px) {
+    .track { display: none; }
+    .events { margin-top: 26px; border-left: 1px solid var(--line); padding-left: 22px; display: grid; gap: 18px; }
+    .events :global(li) { position: relative; display: grid; gap: 2px; }
+    .events :global(li::before) { content: ''; position: absolute; left: -29px; top: 6px; width: 11px; height: 11px; border-radius: 50%; background: var(--surface); border: 2px solid var(--gold); }
+    .events :global(li.tx::before) { border-radius: 2px; transform: rotate(45deg); background: var(--gold); }
+    .events :global(.when) { font-size: .75rem; letter-spacing: .1em; color: var(--muted); }
+    .events :global(li.tx span:last-child) { color: var(--accent-text); font-weight: 600; }
+  }
+
+  .note { margin-top: 22px; color: var(--heading); font-family: var(--font-display); font-size: clamp(1.1rem, 1.8vw, 1.35rem); min-height: 2.6em; }
+  .out { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px; }
+  .kept { padding: 20px 22px; border-radius: var(--radius); border: 1px solid var(--line); transition: border-color .3s, background-color .3s; }
+  .kept.is-active { border-color: var(--accent); background: color-mix(in srgb, var(--gold) 7%, transparent); }
+  .k-lbl { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  .k-num { font-family: var(--font-display); font-size: clamp(1.8rem, 3vw, 2.4rem); color: var(--heading); margin-top: 6px; }
+  .bar { height: 6px; border-radius: 3px; background: var(--surface-2); margin-top: 12px; overflow: hidden; }
+  .bar span { display: block; height: 100%; background: var(--gold); border-radius: 3px; transition: width .7s var(--ease); }
+  [data-card='late'] .bar span { background: color-mix(in srgb, var(--gold) 50%, var(--muted)); }
+  .fine { margin-top: 16px; font-size: .78rem; color: var(--muted); }
+  @media (max-width: 560px) { .out { grid-template-columns: 1fr; } .seg { width: 100%; } .seg button { flex: 1; } }
+</style>

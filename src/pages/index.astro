@@ -1,0 +1,102 @@
+---
+import Base from '../layouts/Base.astro';
+import SectionHead from '../components/SectionHead.astro';
+import ApproachSteps from '../components/ApproachSteps.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import People from '../components/People.astro';
+import Testimonials from '../components/Testimonials.astro';
+import ClosingCta from '../components/ClosingCta.astro';
+import Timeline from '../components/Timeline.astro';
+import AudiencePicker from '../components/AudiencePicker.astro';
+import AdvisorWeb from '../components/AdvisorWeb.astro';
+import { approach as approachCopy } from '../content/firm';
+import { hero, approach, differentiators } from '../content/firm';
+import { services, isListed } from '../content/services';
+import { heroSky } from '../content/hero-sky';
+---
+<Base>
+  <section class="home-hero on-navy" aria-labelledby="hero-h">
+    <div class="sky" aria-hidden="true" style={`--sky:url(${heroSky})`}></div>
+    <div class="wrap inner">
+      <p class="eyebrow">{hero.eyebrow}</p>
+      <h1 id="hero-h" class="h-display">{hero.title} <span class="gold-word">{hero.titleAccent}</span></h1>
+      <p class="lede">{hero.lede}</p>
+      <p class="sig">— {hero.signature}</p>
+      <div class="actions">
+        <a class="btn btn-solid" href="/contact/">Schedule a consultation</a>
+        <a class="btn btn-ghost" href="#years-ahead">See it years ahead</a>
+      </div>
+    </div>
+    <div class="horizon" aria-hidden="true"></div>
+  </section>
+
+  <section class="apart" aria-label="What sets Scaffidi Brunner apart">
+    <ul class="wrap" role="list">
+      {differentiators.apart.map((d) => <li><strong>{d.title}</strong><span>{d.body}</span></li>)}
+    </ul>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow={approach.eyebrow} title={approach.heading}><p>{approach.intro}</p></SectionHead>
+      <ApproachSteps />
+      <p class="more"><a class="link-arrow" href="/our-approach/">Our approach in full</a></p>
+    </div>
+  </section>
+
+  <Timeline />
+
+  <section class="section" id="who" data-section="audience">
+    <div class="wrap">
+      <SectionHead eyebrow={differentiators.eyebrow} title="When Your Financial Life Becomes More Complex, So Should Your Advisor." />
+      <AudiencePicker id="home" />
+      <ul class="service-grid" role="list">
+        {services.filter(isListed).map((s, i) => <ServiceCard service={s} index={i} />)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="Meet the Team" title="Experienced advisors who know your goals and exceed your standards." />
+      <People />
+      <p class="more"><a class="link-arrow" href="/about/">About the firm</a></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="In their words" title="An extension of the family office." />
+      <Testimonials />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="From proactive tax planning to complex transactions" title={approachCopy.together.heading}><p>{approachCopy.together.body[0]}</p></SectionHead>
+      <AdvisorWeb />
+    </div>
+  </section>
+
+  <ClosingCta />
+</Base>
+
+<style>
+  .home-hero { position: relative; overflow: hidden; isolation: isolate; padding-block: clamp(88px, 15vw, 180px) clamp(80px, 12vw, 140px); text-align: center; }
+  .sky { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(13, 22, 41, .94) 0%, rgba(20, 32, 59, .82) 55%, rgba(13, 22, 41, .97) 100%), var(--sky) center 60% / cover no-repeat; }
+  .h-display { max-width: 13ch; margin: 26px auto 0; }
+  .lede { margin: 30px auto 0; color: #c9cbd6; font-weight: 300; }
+  .sig { margin-top: 18px; font-family: var(--font-display); font-style: italic; color: var(--gold-soft); font-size: 1.05rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 40px; }
+  .horizon { position: absolute; left: 50%; bottom: 0; width: min(82vw, 1200px); height: 1px; transform: translateX(-50%); background: linear-gradient(90deg, transparent, var(--gold), transparent); box-shadow: 0 0 44px 6px rgba(178, 144, 99, .45); }
+  .apart { background: var(--surface); border-bottom: 1px solid var(--line); }
+  .apart ul { list-style: none; margin-block: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); }
+  .apart li { padding: 26px 22px; display: grid; gap: 4px; }
+  .apart li + li { border-left: 1px solid var(--line); }
+  .apart strong { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; color: var(--heading); }
+  .apart span { font-size: .85rem; color: var(--muted); }
+  .more { margin-top: 40px; }
+  .service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 22px; margin: 0; padding: 0; }
+  [data-section]:empty { display: none; }
+  @media (max-width: 860px) { .apart ul { grid-template-columns: 1fr 1fr; } .apart li:nth-child(3) { border-left: 0; } .apart li:nth-child(n + 3) { border-top: 1px solid var(--line); } }
+</style>

@@ -1,0 +1,33 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+  lede?: string;
+  image?: string;
+  compact?: boolean;
+}
+const { eyebrow, title, accent, lede, image, compact = false } = Astro.props;
+---
+<section class:list={['page-hero on-navy', { compact, 'has-image': !!image }]}>
+  {image && <div class="bg" style={`--img:url(${image})`} aria-hidden="true"></div>}
+  <div class="wrap inner">
+    <p class="eyebrow">{eyebrow}</p>
+    <h1 class="title">{title}{accent && <> <span class="gold-word">{accent}</span></>}</h1>
+    {lede && <p class="lede">{lede}</p>}
+    <div class="actions"><slot /></div>
+  </div>
+  <div class="horizon" aria-hidden="true"></div>
+</section>
+
+<style>
+  .page-hero { position: relative; overflow: hidden; padding-block: clamp(72px, 12vw, 148px) clamp(64px, 9vw, 112px); isolation: isolate; }
+  .page-hero.compact { padding-block: clamp(56px, 8vw, 96px) clamp(48px, 7vw, 80px); }
+  .bg { position: absolute; inset: 0; z-index: -1; background: linear-gradient(100deg, rgba(13, 22, 41, .96) 0%, rgba(20, 32, 59, .86) 45%, rgba(20, 32, 59, .55) 100%), var(--img) center / cover no-repeat; }
+  .inner { position: relative; }
+  .title { font-size: clamp(2.5rem, 6vw, 5rem); line-height: 1; letter-spacing: -.01em; max-width: 16ch; margin-top: 22px; }
+  .compact .title { font-size: clamp(2.2rem, 4.6vw, 3.8rem); max-width: 20ch; }
+  .lede { color: #c9cbd6; font-weight: 300; margin-top: 26px; max-width: 58ch; }
+  .actions:not(:empty) { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 36px; }
+  .horizon { position: absolute; left: 50%; bottom: 0; width: min(80vw, 1100px); height: 1px; transform: translateX(-50%); background: linear-gradient(90deg, transparent, var(--gold), transparent); box-shadow: 0 0 36px 4px rgba(178, 144, 99, .4); }
+</style>

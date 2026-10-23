@@ -1,0 +1,80 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Consent from '../components/Consent.astro';
+import NoteDialog from '../components/NoteDialog.astro';
+import { site } from '../config/site';
+import gildaWoff2 from '@fontsource/gilda-display/files/gilda-display-latin-400-normal.woff2?url';
+import montserratWoff2 from '@fontsource/montserrat/files/montserrat-latin-400-normal.woff2?url';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title,
+  description = 'We serve clients whose financial lives demand more than annual tax preparation. Through proactive tax planning and partner-led guidance, we help build long-term success.',
+} = Astro.props;
+const fullTitle = title ? `${title} | ${site.name}` : `${site.name} | Strategic Tax & Advisory for Complex Wealth`;
+const canonical = new URL(Astro.url.pathname, site.url).href;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL('/media/scaffidi-milwaukee-skyline.jpg', site.url).href} />
+    <meta name="theme-color" content="#14203b" />
+    <link rel="preload" href={gildaWoff2} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={montserratWoff2} as="font" type="font/woff2" crossorigin />
+    <link rel="icon" type="image/png" href="/brand/ScaffidiBrunner_LetterLogo_Favicon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <script is:inline>
+      // Runs before first paint: stored choice, else the system setting. Never throws.
+      (function () {
+        var d = document.documentElement, t = null;
+        try { t = localStorage.getItem('sb-theme'); } catch (e) {}
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        d.dataset.theme = t;
+        d.classList.add('js');
+      })();
+    </script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <Header />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <Consent />
+    {site.showPersonalNote && Astro.url.pathname === '/' && <NoteDialog />}
+    <slot name="end" />
+    <script>
+      const els = document.querySelectorAll('[data-reveal]');
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          for (const e of entries) if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+        }, { rootMargin: '0px 0px -8% 0px' });
+        els.forEach((el) => io.observe(el));
+      } else {
+        els.forEach((el) => el.classList.add('is-in'));
+      }
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  .skip { position: absolute; left: 16px; top: -60px; z-index: 100; background: var(--gold); color: var(--navy); padding: 10px 16px; border-radius: 8px; font-weight: 600; text-decoration: none; }
+  .skip:focus { top: 12px; }
+  main:focus { outline: none; }
+</style>

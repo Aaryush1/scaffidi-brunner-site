@@ -1,0 +1,72 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import SectionHead from '../../components/SectionHead.astro';
+import ClosingCta from '../../components/ClosingCta.astro';
+import { services, isListed, type Service } from '../../content/services';
+
+export function getStaticPaths() {
+  return services.map((service) => ({ params: { slug: service.slug }, props: { service } }));
+}
+const { service: s } = Astro.props as { service: Service };
+const others = services.filter((o) => o.slug !== s.slug && isListed(o));
+---
+<Base title={s.title} description={s.summary}>
+  <PageHero eyebrow={s.eyebrow} title={s.heading} lede={s.intro[0]} image={s.image} compact>
+    <a class="btn btn-solid" href="/contact/">Schedule a consultation</a>
+  </PageHero>
+
+  {s.intro.length > 1 && (
+    <section class="section"><div class="wrap"><p class="lede big">{s.intro.slice(1).join(' ')}</p></div></section>
+  )}
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow={s.title} title={s.pillarsHeading} />
+      <ol class="pillars" role="list">
+        {s.pillars.map((p, i) => (
+          <li data-reveal style={`transition-delay:${i * 80}ms`}>
+            <span class="num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="h-card">{p.title}</h3>
+            <p>{p.body}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section closing">
+    <div class="wrap split">
+      <h2 class="h-section">{s.closingTitle}</h2>
+      <p class="lede">{s.closingBody}</p>
+    </div>
+  </section>
+
+  <nav class="section" aria-labelledby="other-h">
+    <div class="wrap">
+      <h2 id="other-h" class="eyebrow">Other capabilities</h2>
+      <ul class="others" role="list">
+        {others.map((o) => <li><a href={`/services/${o.slug}/`}><span>{o.title}</span><small>{o.tagline}</small></a></li>)}
+      </ul>
+    </div>
+  </nav>
+  <ClosingCta />
+</Base>
+
+<style>
+  .big { font-family: var(--font-display); color: var(--heading); font-size: clamp(1.4rem, 2.6vw, 2.1rem); line-height: 1.35; max-width: 36ch; }
+  .pillars { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--line); }
+  .pillars li { padding: 34px 32px 34px 0; border-bottom: 1px solid var(--line); }
+  .pillars li:nth-child(even) { padding-left: 32px; border-left: 1px solid var(--line); }
+  .num { font-family: var(--font-display); color: var(--accent-text); }
+  .h-card { margin-top: 12px; }
+  .pillars p { margin-top: 10px; color: var(--muted); }
+  .split { display: grid; grid-template-columns: 1fr 1.3fr; gap: clamp(32px, 6vw, 88px); align-items: start; }
+  .others { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 16px; }
+  .others a { display: grid; gap: 6px; height: 100%; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); text-decoration: none; background: var(--surface); transition: border-color .2s; }
+  .others a:hover { border-color: var(--accent); }
+  .others span { font-family: var(--font-display); color: var(--heading); font-size: 1.15rem; }
+  .others small { color: var(--muted); font-size: .82rem; }
+  @media (max-width: 900px) { .others { grid-template-columns: 1fr 1fr; } .split { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { .pillars { grid-template-columns: 1fr; } .pillars li, .pillars li:nth-child(even) { padding: 28px 0; border-left: 0; } .others { grid-template-columns: 1fr; } }
+</style>

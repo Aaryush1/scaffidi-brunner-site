@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import Letter from '../components/Letter.astro';
+---
+<Base title="A note from Aaryush">
+  <section class="on-navy note-page">
+    <Letter headingId="note-page-h" asH1>
+      <p class="back"><a class="btn btn-solid" href="/">Open the site →</a></p>
+    </Letter>
+  </section>
+</Base>
+
+<style>
+  .note-page { display: grid; place-items: center; padding: clamp(48px, 9vw, 120px) 16px; }
+  .back { margin-top: 10px; }
+  .back .btn { color: var(--navy); }
+</style>

@@ -1,0 +1,46 @@
+/* Brand tokens. The hero and header are always navy; everything else follows the theme. */
+:root {
+  --navy: #14203b;
+  --navy-deep: #0d1629;
+  --navy-lift: #24365f;
+  --gold: #b29063;          /* exact brand gold: rules, accents, anything on navy */
+  --gold-soft: #d4b58a;     /* gold text on navy */
+  --paper: #fbf9f9;
+  --ink: #262626;
+
+  --font-display: 'Gilda Display', Georgia, 'Times New Roman', serif;
+  --font-body: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --radius: 14px;
+  --gutter: clamp(16px, 5vw, 72px);
+  --max: 1240px;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+
+  color-scheme: light;
+  --bg: var(--paper);
+  --surface: #ffffff;
+  --surface-2: #f4f0ea;
+  --heading: var(--navy);
+  --text: #3a3f4e;
+  --muted: #5a6072;
+  --line: #e6e0d8;
+  --accent: var(--gold);
+  --accent-text: #7a5e38;   /* darker gold for readable text on light surfaces (5.7:1) */
+  --focus: #7a5e38;
+  --shadow: 0 24px 60px -32px rgba(20, 32, 59, .35);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: var(--navy-deep);
+  --surface: var(--navy);
+  --surface-2: #1a2847;
+  --heading: #f3efe8;
+  --text: #c9cbd6;
+  --muted: #9aa1b5;
+  --line: #2a3858;
+  --accent: var(--gold);
+  --accent-text: var(--gold-soft);
+  --focus: var(--gold-soft);
+  --shadow: 0 24px 60px -32px rgba(0, 0, 0, .7);
+}

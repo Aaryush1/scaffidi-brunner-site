@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { site } from '../config/site';
+const subject = 'Do Not Sell or Share My Personal Information';
+---
+<Base title={subject}>
+  <PageHero eyebrow="Your privacy choices" title={subject} lede="Under applicable state privacy laws you may ask Scaffidi Brunner not to sell or share your personal information." compact />
+  <section class="section">
+    <div class="wrap opt-out">
+      <div class="step">
+        <h2 class="h-card">Opt out on this device</h2>
+        <p>Open your privacy choices and turn off the sale or sharing of your personal information. Your choice is saved for this browser.</p>
+        <button type="button" class="btn btn-solid iubenda-cs-uspr-link" data-consent-open>Open your privacy choices</button>
+      </div>
+      <div class="step">
+        <h2 class="h-card">Or ask us directly</h2>
+        <p>Email us with the subject “{subject}” and include your name and the email address you use with us. We will process your request.</p>
+        <p class="addr"><a href={`mailto:${site.contact.email}?subject=${encodeURIComponent(subject)}`}>{site.contact.email}</a> · <a href={site.contact.phoneHref}>{site.contact.phone}</a></p>
+      </div>
+      <p class="fine">See our <a href="/privacy-policy/">Privacy Policy</a> for how we handle personal information.</p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .opt-out { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 980px; }
+  .step { display: grid; gap: 14px; align-content: start; justify-items: start; padding: 32px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  .addr a { color: var(--heading); }
+  .fine { grid-column: 1 / -1; color: var(--muted); font-size: .9rem; }
+  .fine a { color: var(--accent-text); }
+  @media (max-width: 760px) { .opt-out { grid-template-columns: 1fr; } }
+</style>

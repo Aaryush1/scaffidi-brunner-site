@@ -1,0 +1,21 @@
+---
+import { note } from '../content/note';
+interface Props { headingId: string; asH1?: boolean }
+const { headingId, asH1 = false } = Astro.props;
+const H = asH1 ? 'h1' : 'h2';
+---
+<article class="letter">
+  <p class="from">A note from Aaryush</p>
+  <H class="greet" id={headingId}>{note.greeting}</H>
+  {note.paragraphs.map((p) => <p>{p}</p>)}
+  <p class="sig">{note.signature}</p>
+  <slot />
+</article>
+
+<style>
+  .letter { position: relative; width: min(100%, 640px); padding: clamp(32px, 6vw, 64px); background: #fdfbf7; color: #2b2f3a; border-radius: 6px; box-shadow: 0 50px 100px -40px rgba(0, 0, 0, .65), 0 0 0 1px rgba(178, 144, 99, .35); display: grid; gap: 18px; font-size: 1.04rem; line-height: 1.8; text-align: left; }
+  .letter::before { content: ''; position: absolute; inset: 12px; border: 1px solid rgba(178, 144, 99, .35); border-radius: 3px; pointer-events: none; }
+  .from { font-size: .7rem; letter-spacing: .32em; text-transform: uppercase; color: #7a5e38; font-weight: 500; }
+  .greet { font-family: var(--font-display); font-size: clamp(2rem, 4vw, 2.6rem); color: var(--navy); margin-top: 6px; }
+  .sig { font-family: var(--font-display); font-style: italic; font-size: 1.6rem; color: var(--navy); margin-top: 6px; }
+</style>

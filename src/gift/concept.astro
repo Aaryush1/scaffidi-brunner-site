@@ -1,0 +1,174 @@
+---
+import Base from '../layouts/Base.astro';
+import { examplePrompts } from '../content/concept';
+import { services } from '../content/services';
+const serviceTitles = Object.fromEntries(services.map((s) => [s.slug, s.title]));
+---
+<Base title="Concept: Just tell us" description="A concept: skip the form, describe your situation, and the partner gets a brief before reading your message.">
+  <p class="concept-flag" role="note"><span aria-hidden="true">◆</span> Concept: no AI is running. Let’s talk about making it real.</p>
+
+  <section class="on-navy hero">
+    <div class="wrap">
+      <p class="eyebrow">A concept for Scaffidi Brunner</p>
+      <h1 class="title">Just tell us what’s <span class="gold-word">going on.</span></h1>
+      <p class="lede">No forms, no dropdowns. Describe your situation in your own words. You get a straight answer right away, and the partner gets a brief before ever reading your message.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <form class="ask" data-ask>
+        <label for="ask-text" class="ask-label">What’s going on?</label>
+        <textarea id="ask-text" rows="4" placeholder="Say it however you’d say it to us over coffee." aria-describedby="ask-hint"></textarea>
+        <p id="ask-hint" class="hint">Or start from an example:</p>
+        <ul class="examples" role="list">
+          {examplePrompts.map((p) => <li><button type="button" class="ex" data-example={p}>{p}</button></li>)}
+        </ul>
+        <button type="submit" class="btn btn-solid send" disabled>Send</button>
+      </form>
+
+      <div class="split" data-result hidden>
+        <article class="pane visitor" aria-labelledby="v-h">
+          <header><p class="eyebrow">What you’d see, right away</p><h2 id="v-h" class="h-card">From Scaffidi Brunner</h2></header>
+          <div class="reply" data-reply aria-hidden="true"></div>
+          <div class="sr-only" data-reply-sr aria-live="polite"></div>
+          <p class="fine">Guidance about fit and next steps only. Not tax advice.</p>
+        </article>
+
+        <article class="pane brief" aria-labelledby="b-h" data-brief>
+          <header><p class="eyebrow">What Mike sees before he reads your message</p><h2 id="b-h" class="h-card">New inquiry brief</h2></header>
+          <dl>
+            <div><dt>Who</dt><dd data-f="who"></dd></div>
+            <div><dt>Situation</dt><dd data-f="situation"></dd></div>
+            <div><dt>Urgency</dt><dd><span class="pill" data-f="urgency"></span></dd></div>
+            <div><dt>Complexity signals</dt><dd><ul class="chips" role="list" data-f="complexity"></ul></dd></div>
+            <div><dt>Relevant services</dt><dd><ul class="links" role="list" data-f="services"></ul></dd></div>
+            <div><dt>Ask on the first call</dt><dd><ol class="qs" data-f="questions"></ol></dd></div>
+            <div><dt>In their words</dt><dd><blockquote data-f="words"></blockquote></dd></div>
+          </dl>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section why">
+    <div class="wrap">
+      <p class="eyebrow">Why this matters</p>
+      <h2 class="h-section">The first conversation starts further along.</h2>
+      <div class="cols">
+        <p>The visitor gets a real answer in the moment, in the firm’s voice, instead of a form that disappears into an inbox.</p>
+        <p>The partner walks into the first call already knowing who this is, what makes it complex, and what to ask.</p>
+        <p>Making it real means deciding what the assistant may and may not say. That boundary is the conversation worth having first.</p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script define:vars={{ serviceTitles }}>
+  window.__serviceTitles = serviceTitles;
+</script>
+<script>
+  import { buildBrief, matchScenario } from '../lib/matcher';
+
+  const form = document.querySelector<HTMLFormElement>('[data-ask]')!;
+  const text = form.querySelector<HTMLTextAreaElement>('textarea')!;
+  const send = form.querySelector<HTMLButtonElement>('.send')!;
+  const result = document.querySelector<HTMLElement>('[data-result]')!;
+  const reply = document.querySelector<HTMLElement>('[data-reply]')!;
+  const titles = (window as any).__serviceTitles as Record<string, string>;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let typing = 0;
+
+  const sync = () => { send.disabled = !text.value.trim(); };
+  text.addEventListener('input', sync);
+  form.querySelectorAll<HTMLButtonElement>('[data-example]').forEach((b) =>
+    b.addEventListener('click', () => { text.value = b.dataset.example!; sync(); text.focus(); }),
+  );
+
+  const el = (tag: string, txt: string, cls?: string) => { const n = document.createElement(tag); n.textContent = txt; if (cls) n.className = cls; return n; };
+  const field = (f: string) => document.querySelector<HTMLElement>(`[data-f="${f}"]`)!;
+
+  const typeOut = (lines: string[]) => {
+    const run = ++typing;
+    reply.replaceChildren();
+    if (reduce) { lines.forEach((l) => reply.append(el('p', l))); return; }
+    let li = 0, wi = 0, p: HTMLElement | null = null;
+    const words = lines.map((l) => l.split(' '));
+    const tick = () => {
+      if (run !== typing || li >= words.length) return;
+      if (wi === 0) { p = el('p', ''); reply.append(p); }
+      p!.textContent += (wi ? ' ' : '') + words[li][wi];
+      if (++wi >= words[li].length) { li++; wi = 0; }
+      setTimeout(tick, 28);
+    };
+    tick();
+  };
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const msg = text.value.trim();
+    if (!msg) return;
+    const scenario = matchScenario(msg);
+    const brief = buildBrief(msg);
+    result.hidden = false;
+    document.querySelector('[data-reply-sr]')!.textContent = scenario.reply.join(' ');
+    typeOut(scenario.reply);
+    field('who').textContent = brief.who;
+    field('situation').textContent = brief.situation;
+    field('urgency').textContent = brief.urgency;
+    field('complexity').replaceChildren(...brief.complexity.map((c) => el('li', c)));
+    field('services').replaceChildren(...brief.services.map((slug) => {
+      const li = document.createElement('li');
+      const a = el('a', titles[slug] ?? slug) as HTMLAnchorElement;
+      a.href = `/services/${slug}/`;
+      li.append(a);
+      return li;
+    }));
+    field('questions').replaceChildren(...brief.firstCallQuestions.map((q) => el('li', q)));
+    field('words').textContent = `“${brief.inTheirWords}”`;
+    result.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  });
+</script>
+
+<style>
+  .concept-flag { position: sticky; top: 76px; z-index: 30; margin: 0; padding: 10px 16px; text-align: center; font-size: .8rem; font-weight: 600; letter-spacing: .04em; background: var(--gold); color: var(--navy); }
+  .hero { padding-block: clamp(64px, 10vw, 120px); }
+  .title { font-size: clamp(2.5rem, 6vw, 4.8rem); line-height: 1; max-width: 14ch; margin-top: 20px; }
+  .lede { margin-top: 24px; color: #c9cbd6; font-weight: 300; }
+  .ask { display: grid; gap: 14px; max-width: 860px; }
+  .ask-label { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.2rem); color: var(--heading); }
+  textarea { width: 100%; padding: 18px 20px; font: inherit; font-size: 1.1rem; color: var(--heading); background: var(--surface); border: 1px solid #8f8a84; border-radius: 14px; resize: vertical; }
+  :global([data-theme='dark']) textarea { border-color: #6b7697; }
+  textarea:focus { outline: none; border-color: var(--accent-text); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 35%, transparent); }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .examples { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+  .ex { text-align: left; padding: 10px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--heading); font-size: .88rem; cursor: pointer; transition: border-color .2s; }
+  .ex:hover { border-color: var(--accent); }
+  .send { justify-self: start; }
+  .send:disabled { opacity: .5; cursor: not-allowed; }
+
+  .split { display: grid; grid-template-columns: 1fr 1.1fr; gap: 22px; margin-top: clamp(40px, 6vw, 64px); scroll-margin-top: 140px; }
+  .pane { border-radius: calc(var(--radius) + 4px); padding: clamp(22px, 3vw, 34px); display: grid; align-content: start; gap: 18px; }
+  .pane header { display: grid; gap: 8px; }
+  .visitor { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+  .reply { display: grid; gap: 14px; min-height: 12em; }
+  .reply :global(p) { color: var(--text); }
+  .fine { font-size: .78rem; color: var(--muted); }
+  .brief { background: var(--navy); color: #d9dbe4; border: 1px solid rgba(178, 144, 99, .4); }
+  .brief .eyebrow { color: var(--gold-soft); }
+  .brief .h-card { color: #f6f2ea; }
+  dl { margin: 0; display: grid; gap: 0; }
+  dl > div { display: grid; grid-template-columns: 150px 1fr; gap: 16px; padding: 14px 0; border-top: 1px solid rgba(178, 144, 99, .2); }
+  dt { font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; color: #aab0c3; padding-top: 3px; }
+  dd { margin: 0; }
+  .pill { display: inline-block; padding: 4px 12px; border-radius: 999px; background: var(--gold); color: var(--navy); font-weight: 600; font-size: .8rem; }
+  .chips, .links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips :global(li) { padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(212, 181, 138, .5); font-size: .8rem; color: var(--gold-soft); }
+  .links :global(a) { color: #f6f2ea; font-size: .9rem; }
+  .qs { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  blockquote { margin: 0; font-family: var(--font-display); font-size: 1.1rem; color: #f6f2ea; }
+  .why .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 32px; }
+  .why .cols p { border-top: 1px solid var(--accent); padding-top: 18px; }
+  .why .h-section { margin-top: 14px; max-width: 22ch; }
+  @media (max-width: 900px) { .split, .why .cols { grid-template-columns: 1fr; } dl > div { grid-template-columns: 1fr; gap: 6px; } }
+</style>

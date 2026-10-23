@@ -1,0 +1,50 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHead from '../components/SectionHead.astro';
+import People from '../components/People.astro';
+import Testimonials from '../components/Testimonials.astro';
+import ClosingCta from '../components/ClosingCta.astro';
+import { founders, differentiators } from '../content/firm';
+---
+<Base title="About" description={founders.body[0]}>
+  <PageHero eyebrow="About Scaffidi Brunner" title={founders.heading} lede={founders.body[0]} image="/media/scaffidi-hero-handshake.jpg" />
+
+  <section class="section">
+    <div class="wrap founders">
+      <p class="pull">{founders.body[1]}</p>
+      <p class="sig">— {founders.signature}</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <SectionHead eyebrow="Meet the Team" title="Experienced advisors who know your goals and exceed your standards." />
+      <People />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <ul class="apart" role="list">
+        {differentiators.apart.map((d) => <li><strong>{d.title}</strong><span>{d.body}</span></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap"><SectionHead eyebrow="In their words" title="Trusted by owners and families." /><Testimonials /></div>
+  </section>
+  <ClosingCta />
+</Base>
+
+<style>
+  .founders { max-width: 900px; }
+  .pull { font-family: var(--font-display); color: var(--heading); font-size: clamp(1.6rem, 3.2vw, 2.6rem); line-height: 1.3; }
+  .sig { margin-top: 24px; font-family: var(--font-display); font-style: italic; color: var(--accent-text); font-size: 1.15rem; }
+  .apart { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+  .apart li { display: grid; gap: 6px; border-top: 1px solid var(--accent); padding-top: 20px; }
+  .apart strong { font-family: var(--font-display); font-weight: 400; color: var(--heading); font-size: 1.35rem; }
+  .apart span { color: var(--muted); }
+  @media (max-width: 860px) { .apart { grid-template-columns: 1fr 1fr; } }
+</style>

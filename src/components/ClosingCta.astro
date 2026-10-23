@@ -1,0 +1,27 @@
+---
+import { closingCta } from '../content/firm';
+import { site } from '../config/site';
+---
+<section class="cta on-navy" aria-labelledby="cta-h">
+  <div class="wrap inner">
+    <div>
+      <p class="eyebrow">{closingCta.eyebrow}</p>
+      <h2 id="cta-h" class="h-section">{closingCta.heading}</h2>
+      <p class="body">{closingCta.body}</p>
+    </div>
+    <div class="actions">
+      <a class="btn btn-solid" href="/contact/">{closingCta.button}</a>
+      <a class="btn btn-ghost" href={site.contact.phoneHref}>Call {site.contact.phone}</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta { padding-block: clamp(72px, 10vw, 120px); position: relative; overflow: hidden; }
+  .cta::before { content: ''; position: absolute; right: -10%; top: -40%; width: 60%; aspect-ratio: 1; border-radius: 50%; border: 1px solid rgba(178, 144, 99, .18); box-shadow: 0 0 0 60px rgba(178, 144, 99, .03), 0 0 0 140px rgba(178, 144, 99, .02); }
+  .inner { display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; align-items: end; position: relative; }
+  .h-section { margin-top: 16px; max-width: 18ch; }
+  .body { margin-top: 18px; color: #c9cbd6; max-width: 48ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: 14px; justify-content: flex-end; }
+  @media (max-width: 860px) { .inner { grid-template-columns: 1fr; } .actions { justify-content: flex-start; } }
+</style>

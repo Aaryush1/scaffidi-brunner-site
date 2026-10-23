@@ -1,0 +1,130 @@
+---
+import { site } from '../config/site';
+// Optional: a form service URL (Formspree, Basin, etc.) that accepts a JSON POST. See README.
+const endpoint = import.meta.env.PUBLIC_FORM_ENDPOINT ?? '';
+---
+<form class="contact-form" method="post" action={`mailto:${site.contact.email}`} enctype="text/plain" data-contact-form data-endpoint={endpoint} data-to={site.contact.email}>
+  <fieldset class="row">
+    <legend class="label">Name <span class="req">(required)</span></legend>
+    <div class="field">
+      <label for="cf-first">First</label>
+      <input id="cf-first" name="first" autocomplete="given-name" required aria-describedby="cf-first-err" />
+      <p class="err" id="cf-first-err" hidden></p>
+    </div>
+    <div class="field">
+      <label for="cf-last">Last</label>
+      <input id="cf-last" name="last" autocomplete="family-name" />
+    </div>
+  </fieldset>
+  <div class="row">
+    <div class="field">
+      <label for="cf-phone">Phone</label>
+      <input id="cf-phone" name="phone" type="tel" autocomplete="tel" aria-describedby="cf-phone-err" />
+      <p class="err" id="cf-phone-err" hidden></p>
+    </div>
+    <div class="field">
+      <label for="cf-email">Email <span class="req">(required)</span></label>
+      <input id="cf-email" name="email" type="email" autocomplete="email" required aria-describedby="cf-email-err" />
+      <p class="err" id="cf-email-err" hidden></p>
+    </div>
+  </div>
+  <div class="field">
+    <label for="cf-message">Message</label>
+    <textarea id="cf-message" name="message" rows="6"></textarea>
+  </div>
+  <div class="field check">
+    <input id="cf-consent" name="consent" type="checkbox" value="yes" required aria-describedby="cf-consent-err" />
+    <label for="cf-consent">I agree to the <a href="/privacy-policy/">Privacy Policy</a> and consent to Scaffidi Brunner contacting me about my inquiry. <span class="req">(required)</span></label>
+    <p class="err" id="cf-consent-err" hidden></p>
+  </div>
+  <button class="btn btn-solid" type="submit">Submit Message</button>
+  <p class="status" role="status" aria-live="polite"></p>
+</form>
+
+<script>
+  import { mailtoHref, validateContact, type ContactFields } from '../lib/contact';
+
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+  if (form) {
+    form.noValidate = true; // with JS, our inline errors replace the browser's bubbles
+    const status = form.querySelector<HTMLElement>('.status')!;
+    const button = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
+    const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement;
+    const order: (keyof ContactFields)[] = ['first', 'phone', 'email', 'consent'];
+
+    const read = (): ContactFields => ({
+      first: field('first').value, last: field('last').value, phone: field('phone').value,
+      email: field('email').value, message: field('message').value, consent: field('consent').checked,
+    });
+
+    const showOne = (name: keyof ContactFields, msg?: string) => {
+      const err = form.querySelector<HTMLElement>(`#cf-${name}-err`)!;
+      field(name).setAttribute('aria-invalid', String(!!msg));
+      err.hidden = !msg;
+      err.textContent = msg ?? '';
+    };
+    const show = (errors: Partial<Record<keyof ContactFields, string>>) => order.forEach((n) => showOne(n, errors[n]));
+
+    // Once a field has been flagged, re-check it as the visitor fixes it.
+    const recheck = (e: Event) => {
+      const name = (e.target as HTMLInputElement).name as keyof ContactFields;
+      if (order.includes(name) && field(name).getAttribute('aria-invalid') === 'true') showOne(name, validateContact(read())[name]);
+    };
+    form.addEventListener('input', recheck);
+    form.addEventListener('change', recheck);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = read();
+      const errors = validateContact(data);
+      show(errors);
+      const first = order.find((n) => errors[n]);
+      if (first) { field(first).focus(); status.textContent = ''; return; }
+
+      const endpoint = form.dataset.endpoint;
+      if (!endpoint) {
+        const href = mailtoHref(data, form.dataset.to!);
+        const open = (window as any).__openMail ?? ((h: string) => { window.location.href = h; });
+        open(href);
+        status.textContent = 'Your email app should open with your message ready to send. If it doesn’t, email us directly at ' + form.dataset.to + '.';
+        return;
+      }
+      button.disabled = true;
+      status.textContent = 'Sending…';
+      try {
+        const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(data) });
+        if (!res.ok) throw new Error(String(res.status));
+        form.reset();
+        status.textContent = 'Thank you. Your message has been sent, and we’ll be in touch shortly.';
+      } catch {
+        status.textContent = 'Something went wrong sending your message. Please call us or email ' + form.dataset.to + ' directly.';
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .contact-form { display: grid; gap: 22px; }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  fieldset.row > legend { grid-column: 1 / -1; float: left; width: 100%; margin-bottom: 8px; }
+  .label, label { display: block; font-size: .8rem; font-weight: 500; letter-spacing: .06em; color: var(--heading); margin-bottom: 8px; }
+  .req { color: var(--muted); font-weight: 400; }
+  input:not([type='checkbox']), textarea { width: 100%; padding: 14px 16px; font: inherit; color: var(--heading); background: var(--surface); border: 1px solid #8f8a84; border-radius: 10px; transition: border-color .2s, box-shadow .2s; }
+  :global([data-theme='dark']) input:not([type='checkbox']), :global([data-theme='dark']) textarea { border-color: #6b7697; }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent-text); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 35%, transparent); }
+  [aria-invalid='true'] { border-color: #b4233c !important; }
+  :global([data-theme='dark']) [aria-invalid='true'] { border-color: #ff8a9e !important; }
+  .check { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; }
+  .check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--gold); }
+  .check label { font-weight: 400; letter-spacing: 0; font-size: .92rem; color: var(--text); margin: 0; }
+  .check .err { grid-column: 2; }
+  .err { margin-top: 6px; font-size: .85rem; color: #b4233c; font-weight: 500; }
+  :global([data-theme='dark']) .err { color: #ff8a9e; }
+  button { justify-self: start; }
+  .status:empty { display: none; }
+  .status { padding: 14px 16px; border-radius: 10px; background: var(--surface-2); color: var(--heading); }
+  @media (max-width: 560px) { .row { grid-template-columns: 1fr; } }
+</style>

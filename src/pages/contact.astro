@@ -1,0 +1,54 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { site } from '../config/site';
+---
+<Base title="Schedule a Consultation" description="Let’s talk about what’s ahead—and how thoughtful planning can help you get there.">
+  <PageHero eyebrow="Schedule a Consultation" title="Let’s Start the Conversation" lede="Let’s talk about what’s ahead—and how thoughtful planning can help you get there." compact />
+
+  <section class="section">
+    <div class="wrap grid">
+      <div class="form-col">
+        <h2 class="h-card">Send us a message</h2>
+        <ContactForm />
+        {site.showAIConcept && (
+          <aside class="concept-cta" aria-label="A concept">
+            <p class="eyebrow">Concept</p>
+            <p>What if you could skip the form and just tell us what’s going on?</p>
+            <a class="link-arrow" href="/concept/">Try the concept</a>
+          </aside>
+        )}
+      </div>
+      <aside class="info" aria-label="Office details">
+        <div>
+          <h2 class="eyebrow">Our Office</h2>
+          <address><a href={site.contact.mapsUrl} target="_blank" rel="noopener">{site.contact.addressLines.map((l) => <span>{l}</span>)}<span class="sr-only"> (opens map in a new tab)</span></a></address>
+          <a class="link-arrow" href={site.contact.mapsUrl} target="_blank" rel="noopener">Find directions<span class="sr-only"> (opens in a new tab)</span></a>
+        </div>
+        <div>
+          <h2 class="eyebrow">Direct Contact</h2>
+          <p><a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></p>
+          <p><a href={site.contact.phoneHref}>{site.contact.phone}</a></p>
+        </div>
+        <div>
+          <h2 class="eyebrow">Business Hours</h2>
+          <p>{site.contact.hours}</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: clamp(40px, 7vw, 100px); align-items: start; }
+  .form-col > .h-card { margin-bottom: 26px; }
+  .concept-cta { margin-top: 40px; padding: 24px; border: 1px dashed var(--accent); border-radius: var(--radius); display: grid; gap: 10px; justify-items: start; }
+  .info { display: grid; gap: 36px; padding: 36px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  .info .eyebrow { margin-bottom: 12px; }
+  address { font-style: normal; margin-bottom: 12px; }
+  address span { display: block; }
+  .info a:not(.link-arrow) { color: var(--heading); text-decoration: none; }
+  .info a:not(.link-arrow):hover { text-decoration: underline; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+</style>
