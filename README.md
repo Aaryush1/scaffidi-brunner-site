@@ -87,3 +87,7 @@ Astro 7, TypeScript, no UI framework: interactive pieces are small vanilla TypeS
 ## License
 
 The code is MIT-licensed: use, change and own it however you like, no permission needed. The name, logos, photos and written copy belong to Scaffidi Brunner.
+
+## Known issues
+
+A short list of small, non-blocking items lives in [KNOWN_ISSUES.md](KNOWN_ISSUES.md). If you open this repo in Claude Code, it will bring them up automatically.
