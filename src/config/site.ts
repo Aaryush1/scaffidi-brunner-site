@@ -7,7 +7,8 @@
  */
 export function readFlags(env: Record<string, string | undefined> = process.env) {
   const gift = env.GIFT === '1';
-  return { showPersonalNote: gift, showAIConcept: gift };
+  // isGiftPreview: the shareable preview build gets a "not the official site" banner and noindex.
+  return { showPersonalNote: gift, showAIConcept: gift, isGiftPreview: gift };
 }
 
 const flags = readFlags();

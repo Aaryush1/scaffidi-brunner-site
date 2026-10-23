@@ -1,8 +1,10 @@
 ---
 import { team } from '../content/firm';
+const groups = [team.filter((p) => p.partner), team.filter((p) => !p.partner)];
 ---
-<ul class="people" role="list">
-  {team.map((p, i) => (
+{groups.map((group, g) => (
+<ul class:list={['people', g === 0 ? 'partners' : 'staff']} role="list">
+  {group.map((p, i) => (
     <li class:list={['person', { partner: p.partner }]} data-reveal style={`transition-delay:${i * 70}ms`}>
       <div class="portrait">
         {p.photo
@@ -21,11 +23,12 @@ import { team } from '../content/firm';
     </li>
   ))}
 </ul>
+))}
 
 <style>
-  .people { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: clamp(20px, 3vw, 36px); }
-  .person { grid-column: span 2; }
-  .person.partner { grid-column: span 3; }
+  .people { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(20px, 3vw, 36px); align-items: start; }
+  .partners { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .staff { grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); margin-top: clamp(28px, 4vw, 48px); }
   .portrait { aspect-ratio: 4 / 5; border-radius: var(--radius); overflow: hidden; display: grid; place-items: center; background: radial-gradient(120% 90% at 30% 10%, var(--navy-lift), var(--navy) 55%, var(--navy-deep)); border: 1px solid rgba(178, 144, 99, .3); position: relative; }
   .partner .portrait { aspect-ratio: 16 / 11; }
   .portrait::after { content: ''; position: absolute; inset: 14px; border: 1px solid rgba(178, 144, 99, .25); border-radius: calc(var(--radius) - 6px); pointer-events: none; }
@@ -37,8 +40,9 @@ import { team } from '../content/firm';
   .more summary { cursor: pointer; font-size: .8rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-text); width: fit-content; }
   .bio { margin-top: 10px; font-size: .95rem; color: var(--text); }
   @media (max-width: 760px) {
-    .people { grid-template-columns: 1fr 1fr; }
-    .person, .person.partner { grid-column: span 1; }
-    .partner .portrait { aspect-ratio: 4 / 5; }
+    .staff { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 520px) {
+    .partners { grid-template-columns: minmax(0, 1fr); }
   }
 </style>

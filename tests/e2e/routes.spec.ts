@@ -30,6 +30,12 @@ test('footer carries the US privacy opt-out link iubenda binds to', async ({ pag
   await expect(page.locator('footer a.iubenda-cs-uspr-link')).toHaveAttribute('href', '/do-not-sell-or-share-my-personal-information/');
 });
 
+test('production has no preview banner and is indexable', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('note', { name: 'Preview notice' })).toHaveCount(0);
+  await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+});
+
 test('every internal link resolves', async ({ page, request }) => {
   const seen = new Set<string>();
   for (const route of ROUTES) {

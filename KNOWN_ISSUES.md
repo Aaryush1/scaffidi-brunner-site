@@ -2,6 +2,11 @@
 
 Small, known items from the final review (October 2026). None of them block going live or affect what a visitor sees first. Fix them whenever it's convenient; check an item off (or delete it) once it's done.
 
+## Confirm with the firm
+
+- [ ] **Main phone number.** The site (like the current one) lists **(262) 283-5091**. The firm's October 2026 announcement to clients says **(262) 283-2091** "remains unchanged". One of them is a typo. Confirm which, then update `phone` and `phoneHref` in `src/config/site.ts` if needed.
+- [ ] **Kim Anderson, CPA and Mason Buss, EA** were added from that announcement with their credential only. Add titles, bios and headshots in `src/content/firm.ts`.
+
 ## Check on the real domain after launch
 
 - [ ] **"Your Privacy Choices" in the footer** (`src/components/Footer.astro`) relies on the firm's iubenda widget, which binds to the `iubenda-cs-preferences-link` class. The current site's widget may be set up for US privacy only (`iubenda-cs-uspr-link`). After switching the domain, click it and confirm the iubenda preferences open. If they don't, change the class or remove the button; the "Do Not Sell or Share" link next to it already covers the US opt-out. Before iubenda loads, or with an ad blocker, the button does nothing.

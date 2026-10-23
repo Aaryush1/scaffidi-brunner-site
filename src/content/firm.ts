@@ -93,14 +93,14 @@ export const audiences: Audience[] = [
 ];
 
 export const testimonials = [
-  { quote: 'Scaffidi Brunner consistently helps us see the tax and structural implications years ahead—not just at filing time. The partner‑led approach and discretion make them feel like an extension of our family office rather than an outside vendor.', name: 'Greg R.' },
-  { quote: 'Their guidance around entity design and ongoing acquisitions has materially improved our long‑term, after‑tax returns while keeping compliance clean and predictable.', name: 'Melissa J.' },
-  { quote: 'They bring the same technical rigor you’d expect from a large firm, but with a partner‑led, relationship‑driven model that fits the way our family actually makes decisions.', name: 'Mark C.' },
+  { quote: 'Scaffidi Brunner consistently helps us see the tax and structural implications years ahead—not just at filing time. The partner‑led approach and discretion make them feel like an extension of our family office rather than an outside vendor.', name: 'Greg R.', services: ['estate-wealth-transfer', 'advisory'] },
+  { quote: 'Their guidance around entity design and ongoing acquisitions has materially improved our long‑term, after‑tax returns while keeping compliance clean and predictable.', name: 'Melissa J.', services: ['strategic-tax-planning', 'transactions-technical-projects', 'real-estate-tax-advisory'] },
+  { quote: 'They bring the same technical rigor you’d expect from a large firm, but with a partner‑led, relationship‑driven model that fits the way our family actually makes decisions.', name: 'Mark C.', services: ['tax-compliance-execution'] },
 ];
 
 export interface Person { name: string; role: string; initials: string; partner?: boolean; /** Leave empty until written; empty bios are not shown. */ bio: string; personal?: string; photo?: string }
 
-// Bios are word for word from the live About page. TODO(firm): bios for Nick and Austin, and headshots at
+// Bios are word for word from the live About page. TODO(firm): bios for Nick, Austin, Kim and Mason, and headshots at
 // /public/team/<first-last>.jpg (then set `photo`).
 export const team: Person[] = [
   { name: 'Michael Scaffidi', role: 'CPA & Partner', initials: 'MS', partner: true, bio: 'A Brookfield native, Mike earned both his undergraduate and master’s degrees from University of Wisconsin–Milwaukee before beginning his career at Deloitte, where he advised high-net-worth individuals and businesses on complex tax matters. He later led Uline’s tax department before partnering with Eric in 2022 to establish what is now Scaffidi Brunner CPAs & Advisors.', personal: 'Mike is married to Jessica and has three daughters. Outside the office, he enjoys cheering on the Bucks and spending time up north with his family.' },
@@ -108,6 +108,9 @@ export const team: Person[] = [
   { name: 'Nick Vogel', role: 'Tax Manager', initials: 'NV', bio: '' },
   { name: 'Franklin Wistl', role: 'Senior Tax Associate', initials: 'FW', bio: 'Franklin first worked with Mike and Eric during his time at Deloitte and now supports the Scaffidi Brunner team as a seasonal Senior Tax Associate. He earned his undergraduate degree in accounting and finance from University of Wisconsin–Whitewater and brings experience supporting complex tax compliance and client engagements.', personal: 'Outside of tax season, Franklin helps run his family’s sod farm in New Berlin, just down the road from the office. He also enjoys weightlifting, is a member of the 1,000-pound club, and travels between busy seasons.' },
   { name: 'Austin Kleisner', role: 'Tax Associate', initials: 'AK', bio: '' },
+  // From the firm's October 2026 announcement; only the credential is known. TODO(firm): titles and bios.
+  { name: 'Kim Anderson', role: 'CPA', initials: 'KA', bio: '' },
+  { name: 'Mason Buss', role: 'EA', initials: 'MB', bio: '' },
 ];
 
 export const closingCta = {

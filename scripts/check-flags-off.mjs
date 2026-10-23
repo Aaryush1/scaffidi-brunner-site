@@ -4,7 +4,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const dir = process.argv[2] || 'dist';
-const TRACES = ['/note/', '/concept/', 'restomod', 'no AI is running', 'A note from Aaryush'];
+const TRACES = ['/note/', '/concept/', 'restomod', 'no AI is running', 'A note from Aaryush', 'official website', 'noindex'];
 const problems = [];
 
 for (const route of ['note', 'concept']) if (existsSync(join(dir, route))) problems.push(`route exists: ${dir}/${route}/`);

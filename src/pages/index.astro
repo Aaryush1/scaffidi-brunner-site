@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import SectionHead from '../components/SectionHead.astro';
 import ApproachSteps from '../components/ApproachSteps.astro';
-import ServiceCard from '../components/ServiceCard.astro';
+import ServiceIndex from '../components/ServiceIndex.astro';
 import People from '../components/People.astro';
 import Testimonials from '../components/Testimonials.astro';
 import ClosingCta from '../components/ClosingCta.astro';
@@ -50,9 +50,7 @@ import { heroSky } from '../content/hero-sky';
     <div class="wrap">
       <SectionHead eyebrow={differentiators.eyebrow} title="When Your Financial Life Becomes More Complex, So Should Your Advisor." />
       <AudiencePicker id="home" />
-      <ul class="service-grid" role="list">
-        {services.filter(isListed).map((s, i) => <ServiceCard service={s} index={i} />)}
-      </ul>
+      <ServiceIndex items={services.filter(isListed)} />
     </div>
   </section>
 
@@ -96,7 +94,6 @@ import { heroSky } from '../content/hero-sky';
   .apart strong { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; color: var(--heading); }
   .apart span { font-size: .85rem; color: var(--muted); }
   .more { margin-top: 40px; }
-  .service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 22px; margin: 0; padding: 0; }
   [data-section]:empty { display: none; }
   @media (max-width: 860px) { .apart ul { grid-template-columns: 1fr 1fr; } .apart li:nth-child(3) { border-left: 0; } .apart li:nth-child(n + 3) { border-top: 1px solid var(--line); } }
 </style>

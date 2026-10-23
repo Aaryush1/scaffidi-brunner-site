@@ -5,30 +5,31 @@ import { expect, test } from '@playwright/test';
 const skipNote = async (page: import('@playwright/test').Page) =>
   page.addInitScript(() => { try { sessionStorage.setItem('sb-note-seen', '1'); localStorage.setItem('sb-consent', 'necessary'); } catch {} });
 
+test.describe('preview safeguards', () => {
+  test('every page says it is a preview, links to the real site, and is not indexed', async ({ page }) => {
+    for (const route of ['/', '/services/', '/contact/']) {
+      await page.goto(route);
+      const banner = page.getByRole('note', { name: 'Preview notice' });
+      await expect(banner).toContainText('Not the firm’s official website');
+      await expect(banner.getByRole('link', { name: 'scaffidibrunner.com' })).toHaveAttribute('href', 'https://scaffidibrunner.com/');
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+    }
+  });
+});
+
 test.describe('personal note', () => {
-  test('shows on first visit, then not again after dismissal', async ({ page }) => {
+  test('does not pop up over the site', async ({ page }) => {
     await page.goto('/');
-    const note = page.getByRole('dialog', { name: /Mike/ });
-    await expect(note).toBeVisible();
-    await expect(note).toContainText('restomod');
-    await note.getByRole('button', { name: /open the site/i }).click();
-    await expect(note).toBeHidden();
-    await expect(page.locator('#main')).toBeFocused();
-    await page.reload();
-    await expect(page.getByRole('dialog', { name: /Mike/ })).toBeHidden();
+    await expect(page.locator('dialog')).toHaveCount(0);
+    await expect(page.locator('footer').getByRole('link', { name: 'A note from Aaryush' })).toHaveAttribute('href', '/note/');
   });
 
-  test('Escape dismisses it', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.getByRole('dialog', { name: /Mike/ })).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(page.getByRole('dialog', { name: /Mike/ })).toBeHidden();
-  });
-
-  test('/note/ page exists', async ({ page }) => {
+  test('/note/ page exists, signed with the animated signature', async ({ page }) => {
     const res = await page.goto('/note/');
     expect(res?.status()).toBe(200);
     await expect(page.locator('h1')).toContainText('Mike');
+    await expect(page.getByRole('img', { name: 'Aaryush' })).toBeVisible();
+    await expect(page.locator('.letter')).toContainText('open the repo in Claude');
   });
 });
 
